@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Password Generator</title>
+    <!-- FontAwesome for the copy icon -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            display: flex;
+            justify-content: center;
+            height: 100vh;
+            align-items: center;
+            margin: 0;
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f0f2f5;
+        }
+        
+        .Password-container {
+            background-color: pink;
+            width: 500px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0,0,0,.3);
+            margin: 10px;
+            box-sizing: border-box;
+        }
+
+        h2 {
+            margin-top: 0;
+            margin-bottom: 15px;
+            text-align: center;
+            font-size: 22px;
+        }
+
+        .input-container {
+            border: solid 2px black;
+            padding: 10px;
+            border-radius: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: white;
+        }
+
+        .input {
+            border: none;
+            background-color: transparent;
+            outline: none;
+            font-size: 24px;
+            letter-spacing: 4px;
+            width: 100%;
+        }
+
+        .input::placeholder {
+            letter-spacing: 0px;
+        }
+
+        .fa-copy {
+            cursor: pointer;
+            opacity: 0.3;
+            transition: opacity 0.2s ease;
+        }
+        
+        .fa-copy:hover {
+            opacity: 0.7;
+        }
+
+        .btn {
+            background-color: black;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            margin: 15px 0 5px 0;
+            font-size: 20px;
+            cursor: pointer;
+            width: 100%;
+            transition: background-color 0.2s ease, transform 0.1s ease;
+        }
+
+        .btn:hover {
+            background-color: green;
+        }
+
+        .btn:active {
+            transform: scale(0.95);
+        }
+
+        .alert-container {
+            position: fixed;
+            width: 300px;
+            height: 50px;
+            background-color: lightgreen;
+            right: 20px;
+            bottom: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0,0,0,0.3); /* Fixed invalid rgba syntax */
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 20px;
+            transition: right 0.4s ease-in-out;
+            z-index: 1000;
+        }
+        
+        .active.alert-container {
+            right: -350px; /* Offscreen default state */
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Main Password Container -->
+    <div class="Password-container">
+        <h2>Random Password Generator</h2>
+        
+        <div class="input-container">
+            <input 
+                type="text" 
+                id="input" 
+                class="input" 
+                readonly 
+                placeholder="Create Password"
+            >
+            <i class="fa-regular fa-copy fa-2x"></i>
+        </div>
+
+        <button class="btn">Generate Password</button>
+    </div>
+
+    <!-- Alert Dialog -->
+    <div class="alert-container active" id="alertContainer">
+        Password Copied!
+    </div>
+
+    <!-- JavaScript Logic -->
+    <script>
+        const btnelement = document.querySelector('.btn');
+        const inputelement = document.getElementById("input");
+        const copyicon = document.querySelector('.fa-copy');
+        const alertContainer = document.getElementById('alertContainer');
+
+        btnelement.addEventListener("click", () => {
+            createpassword();
+        });
+
+        copyicon.addEventListener("click", () => {
+            copypassword();
+        });
+
+        function createpassword() {
+            const chars = "0123456789abcdefghijklmnopqrstuvwxtz!@#$%^&*()_+?:{}[]ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+            const passwordlength = 14;
+            let password = "";
+            for (let index = 0; index < passwordlength; index++) {
+                const randomnumber = Math.floor(Math.random() * chars.length);
+                password += chars.substring(randomnumber, randomnumber + 1);
+            }
+            inputelement.value = password;
+        }
+
+        let alertTimeout;
+        function copypassword() {
+            // Only attempt to copy if a password has been generated
+            if (!inputelement.value || inputelement.value === "") {
+                return;
+            }
+
+            inputelement.select();
+            inputelement.setSelectionRange(0, 9999);
+            
+            try {
+                const successful = document.execCommand('copy');
+                if (successful) {
+                    // Slide alert in by removing the active class (which positions it at right: 20px)
+                    alertContainer.classList.remove('active');
+                    
+                    // Clear any running timeouts before starting a new one
+                    clearTimeout(alertTimeout);
+                    
+                    // Slide alert out after 2 seconds by adding active class back
+                    alertTimeout = setTimeout(() => {
+                        alertContainer.classList.add('active');
+                    }, 2000);
+                }
+            } catch (err) {
+                console.error('Unable to copy password', err);
+            }
+
+            // Deselect to keep the UI clean
+            window.getSelection().removeAllRanges();
+        }
+    </script>
+</body>
+</html>
